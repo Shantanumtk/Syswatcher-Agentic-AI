@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO_URL="https://github.com/you/syswatcher"   # update with real URL
+REPO_URL="https://github.com/Shantanumtk/Syswatcher-Agentic-AI"   # update with real URL
 SYSWATCHER_DIR="syswatcher"
 
 RED='\033[0;31m'
