@@ -38,7 +38,7 @@ export default function ChatWindow({ serverName, threadId }: Props) {
   }, [serverName])
 
   const addMessage = (msg: Omit<Message, "id">) => {
-    setMessages(prev => [...prev, { ...msg, id: crypto.randomUUID() }])
+    setMessages(prev => [...prev, { ...msg, id: Math.random().toString(36).slice(2) + Date.now().toString(36) }])
   }
 
   const send = async (text: string) => {

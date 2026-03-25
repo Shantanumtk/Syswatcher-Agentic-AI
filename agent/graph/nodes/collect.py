@@ -1,8 +1,8 @@
 import asyncio
 import logging
 from langchain_core.messages import HumanMessage, SystemMessage
-from agent.tools.registry import get_tools_for_intent, get_all_tools
-from agent.db import queries
+from tools.registry import get_tools_for_intent, get_all_tools
+from db import queries
 
 logger = logging.getLogger("syswatcher.collect")
 

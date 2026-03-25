@@ -1,8 +1,14 @@
 .env
+terraform/keys/
+terraform/*.tfvars
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/tfplan
 __pycache__/
 *.pyc
 .next/
 node_modules/
-*.sql.backup
+*.pem
 *.log
 .DS_Store

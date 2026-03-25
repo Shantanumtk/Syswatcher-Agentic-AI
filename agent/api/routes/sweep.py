@@ -2,7 +2,7 @@ import uuid
 import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from agent.graph import syswatcher_graph
+from graph import syswatcher_graph
 
 logger = logging.getLogger("syswatcher.api.sweep")
 router = APIRouter()

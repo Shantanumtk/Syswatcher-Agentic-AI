@@ -1,6 +1,6 @@
 import asyncio
 from langchain_core.tools import tool
-from agent.db import queries
+from db import queries
 
 def _run(coro):
     try:

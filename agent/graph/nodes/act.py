@@ -1,7 +1,7 @@
 import json
 import logging
 from langchain_core.messages import ToolMessage
-from agent.tools.registry import get_all_tools
+from tools.registry import get_all_tools
 
 logger = logging.getLogger("syswatcher.act")
 

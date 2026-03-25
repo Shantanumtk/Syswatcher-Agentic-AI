@@ -1,7 +1,7 @@
 import logging
 from langchain_openai import ChatOpenAI
-from agent.config import settings
-from agent.tools.registry import get_tools_for_intent, get_all_tools
+from config import settings
+from tools.registry import get_tools_for_intent, get_all_tools
 
 logger = logging.getLogger("syswatcher.analyze")
 

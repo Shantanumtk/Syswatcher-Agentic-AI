@@ -1,6 +1,6 @@
 import logging
 from fastapi import APIRouter, HTTPException, Query
-from agent.db import queries
+from db import queries
 
 logger = logging.getLogger("syswatcher.api.history")
 router = APIRouter()

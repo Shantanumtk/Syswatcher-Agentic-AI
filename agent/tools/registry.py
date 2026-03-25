@@ -1,29 +1,29 @@
-from agent.tools.system_tools import (
+from tools.system_tools import (
     get_cpu_stats, get_memory_stats, get_disk_usage,
     get_network_stats, get_top_processes, get_system_uptime,
     get_load_average, get_open_ports,
 )
-from agent.tools.cron_tools import (
+from tools.cron_tools import (
     get_cron_jobs, get_cron_logs, get_failed_crons,
     create_cron_job, delete_cron_job,
 )
-from agent.tools.process_tools import (
+from tools.process_tools import (
     get_process_by_name, get_zombie_processes,
 )
-from agent.tools.log_tools import (
+from tools.log_tools import (
     tail_log_file, search_log_pattern, get_auth_failures,
 )
-from agent.tools.prometheus_tools import (
+from tools.prometheus_tools import (
     query_prometheus_instant, query_prometheus_range,
     get_prometheus_alerts,
 )
-from agent.tools.grafana_tools import (
+from tools.grafana_tools import (
     post_grafana_annotation, get_grafana_annotations,
 )
-from agent.tools.alert_rules_tools import (
+from tools.alert_rules_tools import (
     create_alert_rule, list_alert_rules, remove_alert_rule,
 )
-from agent.tools.notification_tools import (
+from tools.notification_tools import (
     send_slack_alert, send_email_alert,
 )
 
@@ -69,14 +69,14 @@ def get_tools_for_intent(intents: list[str]) -> list:
     seen = set()
     tools = []
     for t in ALWAYS_ON:
-        if t.__name__ not in seen:
+        if t.name not in seen:
             tools.append(t)
-            seen.add(t.__name__)
+            seen.add(t.name)
     for intent in intents:
         for t in TOOL_GROUPS.get(intent, []):
-            if t.__name__ not in seen:
+            if t.name not in seen:
                 tools.append(t)
-                seen.add(t.__name__)
+                seen.add(t.name)
     return tools
 
 def get_all_tools() -> list:
@@ -84,7 +84,7 @@ def get_all_tools() -> list:
     tools = []
     for group in TOOL_GROUPS.values():
         for t in group:
-            if t.__name__ not in seen:
+            if t.name not in seen:
                 tools.append(t)
-                seen.add(t.__name__)
+                seen.add(t.name)
     return tools

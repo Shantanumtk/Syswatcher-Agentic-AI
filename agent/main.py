@@ -4,9 +4,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from agent.db.postgres import get_pool, close_pool
-from agent.api.middleware import log_requests
-from agent.api.routes import ask, sweep, status, history, servers, alerts, crons
+from db.postgres import get_pool, close_pool
+from api.middleware import log_requests
+from api.routes import ask, sweep, status, history, servers, alerts, crons
 
 logging.basicConfig(
     level=logging.INFO,

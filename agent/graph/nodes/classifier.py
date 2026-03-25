@@ -2,7 +2,7 @@ import logging
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
-from agent.config import settings
+from config import settings
 
 logger = logging.getLogger("syswatcher.classifier")
 
@@ -53,7 +53,7 @@ _chain = _prompt | _llm | JsonOutputParser()
 VALID_GROUPS = {"system","cron","process","logs","prometheus","grafana","alerts","notification"}
 
 def classifier_node(state: AgentState) -> dict:
-    from agent.graph.state import AgentState
+    from graph.state import AgentState
 
     # Sweep always uses full tool set
     if state.get("mode") == "sweep":

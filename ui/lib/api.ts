@@ -1,4 +1,10 @@
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const getApiUrl = (): string => {
+  if (typeof window !== "undefined") {
+    return `http://${window.location.hostname}:8000`
+  }
+  return "http://localhost:8000"
+}
+const API = getApiUrl()
 
 export interface AskResponse {
   answer:    string
@@ -8,24 +14,24 @@ export interface AskResponse {
 }
 
 export interface StatusResponse {
-  overall:          string
-  critical_count:   number
-  warn_count:       number
-  info_count:       number
-  total_events:     number
-  period_hours:     number
-  last_sweep_at:    string | null
-  last_sweep_status:string | null
-  servers:          string[]
-  database:         string
+  overall:           string
+  critical_count:    number
+  warn_count:        number
+  info_count:        number
+  total_events:      number
+  period_hours:      number
+  last_sweep_at:     string | null
+  last_sweep_status: string | null
+  servers:           string[]
+  database:          string
 }
 
 export interface Message {
-  id:       string
-  role:     "user" | "agent"
-  content:  string
+  id:        string
+  role:      "user" | "agent"
+  content:   string
   severity?: string
-  ts:       Date
+  ts:        Date
 }
 
 export async function askAgent(

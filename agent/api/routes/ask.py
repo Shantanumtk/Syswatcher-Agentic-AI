@@ -2,8 +2,8 @@ import uuid
 import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from agent.graph import syswatcher_graph
-from agent.db import queries
+from graph import syswatcher_graph
+from db import queries
 
 logger = logging.getLogger("syswatcher.api.ask")
 router = APIRouter()

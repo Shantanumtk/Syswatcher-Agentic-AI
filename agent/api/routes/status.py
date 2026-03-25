@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, HTTPException
-from agent.db import queries
-from agent.db.postgres import get_pool
+from db import queries
+from db.postgres import get_pool
 
 logger = logging.getLogger("syswatcher.api.status")
 router = APIRouter()

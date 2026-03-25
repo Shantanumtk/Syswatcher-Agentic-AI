@@ -1,8 +1,8 @@
 import asyncio
 import logging
 from langchain_openai import ChatOpenAI
-from agent.config import settings
-from agent.db import queries
+from config import settings
+from db import queries
 
 logger = logging.getLogger("syswatcher.report")
 

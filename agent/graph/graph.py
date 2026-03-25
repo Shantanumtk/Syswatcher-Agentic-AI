@@ -1,12 +1,12 @@
 import logging
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
-from agent.graph.state import AgentState
-from agent.graph.nodes.classifier import classifier_node
-from agent.graph.nodes.collect    import collect_node
-from agent.graph.nodes.analyze    import analyze_node
-from agent.graph.nodes.act        import act_node
-from agent.graph.nodes.report     import report_node
+from graph.state import AgentState
+from graph.nodes.classifier import classifier_node
+from graph.nodes.collect    import collect_node
+from graph.nodes.analyze    import analyze_node
+from graph.nodes.act        import act_node
+from graph.nodes.report     import report_node
 
 logger = logging.getLogger("syswatcher.graph")
 

@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-from agent.db import queries
+from db import queries
 
 logger = logging.getLogger("syswatcher.api.alerts")
 router = APIRouter()

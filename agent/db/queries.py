@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime, timezone
 from typing import Optional
-from agent.db.postgres import get_pool
+from db.postgres import get_pool
 
 logger = logging.getLogger("syswatcher.db")
 
