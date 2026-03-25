@@ -1,0 +1,145 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: syswatcher-postgres
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_USER:     ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB:       ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: syswatcher-node-exporter
+    restart: unless-stopped
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    ports:
+      - "9100:9100"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: syswatcher-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/rules:/etc/prometheus/rules
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+      - "--storage.tsdb.retention.time=30d"
+    ports:
+      - "9090:9090"
+    depends_on:
+      - node_exporter
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: syswatcher-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD:     ${GRAFANA_ADMIN_PASSWORD}
+      GF_AUTH_ANONYMOUS_ENABLED:      "false"
+      GF_USERS_ALLOW_SIGN_UP:         "false"
+      GF_FEATURE_TOGGLES_ENABLE:      "publicDashboards"
+      GF_UNIFIED_ALERTING_ENABLED:    "true"
+      GF_ALERTING_ENABLED:            "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  agent:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    container_name: syswatcher-agent
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./agent:/app
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      prometheus:
+        condition: service_healthy
+      grafana:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  scheduler:
+    build:
+      context: ./scheduler
+      dockerfile: Dockerfile
+    container_name: syswatcher-scheduler
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      AGENT_URL:          http://agent:8000
+      SWEEP_INTERVAL_MIN: ${SWEEP_INTERVAL_MIN:-5}
+      SERVERS:            ${SERVERS:-local}
+    depends_on:
+      agent:
+        condition: service_healthy
+
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: syswatcher-ui
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:${API_PORT:-8000}
+    ports:
+      - "${UI_PORT:-3001}:3001"
+    depends_on:
+      agent:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  prometheus_data:
+  grafana_data:

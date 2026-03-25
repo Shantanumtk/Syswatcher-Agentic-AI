@@ -1,0 +1,13 @@
+# Terraform state — never commit
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+tfplan
+
+# SSH keys — never commit
+keys/
+*.pem
+
+# Local vars — may contain sensitive values
+terraform.tfvars

@@ -1,0 +1,93 @@
+groups:
+  - name: node_health
+    interval: 30s
+    rules:
+
+      # CPU
+      - alert: HighCPU
+        expr: >
+          100 - (avg by(server_name, instance)
+            (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU on {{ $labels.server_name }}"
+          description: "CPU usage is {{ $value | printf \"%.1f\" }}%"
+
+      - alert: CriticalCPU
+        expr: >
+          100 - (avg by(server_name, instance)
+            (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical CPU on {{ $labels.server_name }}"
+          description: "CPU usage is {{ $value | printf \"%.1f\" }}% for 5+ minutes"
+
+      # Memory
+      - alert: HighMemory
+        expr: >
+          100 * (1 - node_memory_MemAvailable_bytes
+            / node_memory_MemTotal_bytes) > 85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory on {{ $labels.server_name }}"
+          description: "Memory usage is {{ $value | printf \"%.1f\" }}%"
+
+      - alert: CriticalMemory
+        expr: >
+          100 * (1 - node_memory_MemAvailable_bytes
+            / node_memory_MemTotal_bytes) > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical memory on {{ $labels.server_name }}"
+          description: "Memory usage is {{ $value | printf \"%.1f\" }}%"
+
+      # Disk
+      - alert: DiskWarning
+        expr: >
+          100 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs"}
+            / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs"} * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk filling on {{ $labels.server_name }}:{{ $labels.mountpoint }}"
+          description: "Disk usage is {{ $value | printf \"%.1f\" }}%"
+
+      - alert: DiskCritical
+        expr: >
+          100 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs"}
+            / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs"} * 100) > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk critical on {{ $labels.server_name }}:{{ $labels.mountpoint }}"
+          description: "Disk usage is {{ $value | printf \"%.1f\" }}%"
+
+      # Load average
+      - alert: HighLoad
+        expr: node_load1 > (count by(instance) (node_cpu_seconds_total{mode="idle"}) * 2)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High load average on {{ $labels.server_name }}"
+          description: "Load average is {{ $value | printf \"%.2f\" }}"
+
+      # Node down
+      - alert: NodeDown
+        expr: up{job!="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Node exporter down on {{ $labels.instance }}"
+          description: "Cannot scrape metrics from {{ $labels.instance }}"
