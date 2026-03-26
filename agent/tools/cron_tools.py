@@ -160,12 +160,34 @@ def create_cron_job(
     # Write new crontab via SSH
     if server_name in ("local", "localhost", ""):
         import subprocess
-        # Write to ubuntu user crontab on host via mounted crontab path
+        # Write to correct user crontab on host via mounted crontab path
         import os
-        crontab_path = "/var/spool/cron/crontabs/ubuntu"
+        # Get the configured user for local server (from syswatcher.conf or DB)
+        try:
+            from db import queries
+            import asyncio
+            servers = asyncio.run(queries.get_servers())
+            local_server = next(
+                (s for s in servers if s["name"] in ("local", "localhost")),
+                {"username": "ubuntu"}
+            )
+            cron_user = local_server.get("username", "ubuntu")
+        except Exception:
+            cron_user = "ubuntu"
+
+        crontab_path = f"/var/spool/cron/crontabs/{cron_user}"
         try:
             with open(crontab_path, "w") as cf:
                 cf.write(new_crontab)
+            # Set correct ownership and permissions
+            import pwd
+            uid = pwd.getpwnam(cron_user).pw_uid
+            import grp
+            try:
+                gid = grp.getgrnam("crontab").gr_gid
+            except KeyError:
+                gid = uid
+            os.chown(crontab_path, uid, gid)
             os.chmod(crontab_path, 0o600)
         except Exception as e:
             # fallback
