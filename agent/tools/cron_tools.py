@@ -161,17 +161,22 @@ def create_cron_job(
     if server_name in ("local", "localhost", ""):
         import subprocess
         # Write to correct user crontab on host via mounted crontab path
-        import os
-        # Get the configured user for local server (from syswatcher.conf or DB)
+        import os, pwd, grp, configparser
+
+        # Read user from syswatcher.conf directly — no async needed
+        cron_user = "ubuntu"  # default
         try:
-            from db import queries
-            import asyncio
-            servers = asyncio.run(queries.get_servers())
-            local_server = next(
-                (s for s in servers if s["name"] in ("local", "localhost")),
-                {"username": "ubuntu"}
-            )
-            cron_user = local_server.get("username", "ubuntu")
+            conf_path = "/app/syswatcher.conf"
+            if os.path.exists(conf_path):
+                with open(conf_path) as cf:
+                    for line in cf:
+                        line = line.strip()
+                        if line.startswith("local") and "=" in line:
+                            # format: local = <ip> <user> <key>
+                            parts = line.split("=", 1)[1].strip().split()
+                            if len(parts) >= 2:
+                                cron_user = parts[1]
+                                break
         except Exception:
             cron_user = "ubuntu"
 
@@ -179,10 +184,7 @@ def create_cron_job(
         try:
             with open(crontab_path, "w") as cf:
                 cf.write(new_crontab)
-            # Set correct ownership and permissions
-            import pwd
             uid = pwd.getpwnam(cron_user).pw_uid
-            import grp
             try:
                 gid = grp.getgrnam("crontab").gr_gid
             except KeyError:
@@ -190,10 +192,9 @@ def create_cron_job(
             os.chown(crontab_path, uid, gid)
             os.chmod(crontab_path, 0o600)
         except Exception as e:
-            # fallback
             proc = subprocess.run("crontab -", input=new_crontab, shell=True, capture_output=True, text=True)
             if proc.returncode != 0:
-                return {"success": False, "error": proc.stderr or "crontab write failed"}
+                return {"success": False, "error": str(e)}
     else:
         ip, user, key_path = _get_server_ssh(server_name)
         if not ip:
