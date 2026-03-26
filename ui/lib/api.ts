@@ -20,6 +20,7 @@ export interface StatusResponse {
   info_count:        number
   total_events:      number
   period_hours:      number
+  period_mins:       number
   last_sweep_at:     string | null
   last_sweep_status: string | null
   servers:           string[]
@@ -34,27 +35,20 @@ export interface Message {
   ts:        Date
 }
 
-export async function askAgent(
-  question:   string,
-  threadId:   string,
-  serverName: string
-): Promise<AskResponse> {
+export async function askAgent(question: string, threadId: string, serverName: string): Promise<AskResponse> {
   const res = await fetch(`${API}/ask`, {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify({
-      question,
-      thread_id:   threadId,
-      server_name: serverName,
-    }),
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question, thread_id: threadId, server_name: serverName }),
   })
   if (!res.ok) throw new Error(`Ask failed: ${res.status}`)
   return res.json()
 }
 
 export async function getStatus(serverName?: string, minsBack: number = 5): Promise<StatusResponse> {
-  const params = serverName ? `?server_name=${serverName}&mins_back=${minsBack}` : `?mins_back=${minsBack}`
-  const res = await fetch(`${API}/status${params}`)
+  const params = new URLSearchParams()
+  if (serverName) params.set("server_name", serverName)
+  params.set("mins_back", String(minsBack))
+  const res = await fetch(`${API}/status?${params}`)
   if (!res.ok) throw new Error(`Status failed: ${res.status}`)
   return res.json()
 }
@@ -69,9 +63,8 @@ export async function getServers(): Promise<string[]> {
 
 export async function runSweep(serverName: string): Promise<{ report: string; severity: string }> {
   const res = await fetch(`${API}/sweep`, {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify({ server_name: serverName }),
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ server_name: serverName }),
   })
   if (!res.ok) throw new Error(`Sweep failed: ${res.status}`)
   return res.json()
