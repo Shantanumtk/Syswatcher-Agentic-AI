@@ -1,6 +1,4 @@
-
 services:
-
   postgres:
     image: postgres:16
     container_name: syswatcher-postgres
@@ -96,6 +94,8 @@ services:
       - ./agent:/app
       - /var/spool/cron/crontabs:/var/spool/cron/crontabs
       - /usr/bin/crontab:/usr/bin/crontab
+      - ./syswatcher.conf:/app/syswatcher.conf:ro
+      - /home/ubuntu/Syswatcher-Agentic-AI/terraform/keys:/home/ubuntu/Syswatcher-Agentic-AI/terraform/keys:ro
     ports:
       - "${API_PORT:-8000}:8000"
     depends_on:
