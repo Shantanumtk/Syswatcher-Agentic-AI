@@ -41,6 +41,7 @@ async def ask(req: AskRequest):
                 "severity":      "healthy",
                 "events_stored": 0,
                 "sweep_id":      None,
+                "collected_metrics": {},
             },
             config=config,
         )

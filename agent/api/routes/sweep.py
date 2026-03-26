@@ -32,6 +32,7 @@ async def sweep(req: SweepRequest = SweepRequest()):
                 "severity":      "healthy",
                 "events_stored": 0,
                 "sweep_id":      None,
+                "collected_metrics": {},
             },
             config=config,
         )
