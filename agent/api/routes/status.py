@@ -7,7 +7,7 @@ logger = logging.getLogger("syswatcher.api.status")
 router = APIRouter()
 
 @router.get("")
-async def status(server_name: str = None, hours_back: int = 6):
+async def status(server_name: str = None, mins_back: int = 5):
     """
     Returns overall system health status.
     Used by the UI status bar — polls every 30s.
@@ -21,7 +21,7 @@ async def status(server_name: str = None, hours_back: int = 6):
         # Event summary
         summary = await queries.get_event_summary(
             server_name=server_name,
-            hours_back=hours_back,
+            hours_back=mins_back,
         )
 
         # Last sweep
@@ -40,7 +40,7 @@ async def status(server_name: str = None, hours_back: int = 6):
             "warn_count":     summary.get("warn", 0),
             "info_count":     summary.get("info", 0),
             "total_events":   summary.get("total", 0),
-            "period_hours":   hours_back,
+            "period_mins":    mins_back,
             "last_sweep_at":  str(last_sweep["started_at"]) if last_sweep else None,
             "last_sweep_status": last_sweep["overall"] if last_sweep else None,
             "servers":        [s["name"] for s in servers],

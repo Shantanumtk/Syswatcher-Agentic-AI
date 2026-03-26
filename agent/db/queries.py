@@ -51,7 +51,7 @@ async def get_events(
         SELECT id, server_name, timestamp, severity, category,
                metric, value, message, notified
         FROM events
-        WHERE timestamp > NOW() - ($1 || ' hours')::interval
+        WHERE timestamp > NOW() - ($1 || ' minutes')::interval
     """
     params = [str(hours_back)]
     idx = 2
@@ -80,7 +80,7 @@ async def get_event_summary(
             severity,
             COUNT(*)::int AS count
         FROM events
-        WHERE timestamp > NOW() - ($1 || ' hours')::interval
+        WHERE timestamp > NOW() - ($1 || ' minutes')::interval
     """
     params = [str(hours_back)]
 

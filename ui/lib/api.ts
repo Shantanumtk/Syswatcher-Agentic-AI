@@ -52,8 +52,8 @@ export async function askAgent(
   return res.json()
 }
 
-export async function getStatus(serverName?: string): Promise<StatusResponse> {
-  const params = serverName ? `?server_name=${serverName}` : ""
+export async function getStatus(serverName?: string, minsBack: number = 5): Promise<StatusResponse> {
+  const params = serverName ? `?server_name=${serverName}&mins_back=${minsBack}` : `?mins_back=${minsBack}`
   const res = await fetch(`${API}/status${params}`)
   if (!res.ok) throw new Error(`Status failed: ${res.status}`)
   return res.json()

@@ -26,7 +26,7 @@ export default function StatusBar({ serverName, onRefresh }: Props) {
 
   const fetch_ = async () => {
     try {
-      const s = await getStatus(serverName)
+      const s = await getStatus(serverName, 5)
       setStatus(s)
     } catch {
       /* keep stale data */

@@ -38,11 +38,11 @@ async def add_server(req: AddServerRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{server_name}/summary")
-async def server_summary(server_name: str, hours_back: int = 6):
+async def server_summary(server_name: str, mins_back: int = 360):
     try:
         summary = await queries.get_event_summary(
             server_name=server_name,
-            hours_back=hours_back,
+            hours_back=mins_back,
         )
         sweeps = await queries.get_recent_sweeps(
             server_name=server_name,
@@ -50,7 +50,7 @@ async def server_summary(server_name: str, hours_back: int = 6):
         )
         return {
             "server_name":  server_name,
-            "period_hours": hours_back,
+            "period_mins":  mins_back,
             **summary,
             "recent_sweeps": sweeps,
         }

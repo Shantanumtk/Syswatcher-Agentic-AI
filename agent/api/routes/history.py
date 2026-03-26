@@ -8,7 +8,7 @@ router = APIRouter()
 @router.get("/events")
 async def get_events(
     server_name: str  = Query(None,  description="Filter by server name"),
-    hours_back:  int  = Query(24,    description="Hours of history"),
+    mins_back:   int  = Query(1440,  description="Minutes of history"),
     severity:    str  = Query(None,  description="Filter: info | warn | critical"),
     category:    str  = Query(None,  description="Filter: system | cron | logs | prometheus"),
     limit:       int  = Query(100,   description="Max results", le=500),
@@ -16,7 +16,7 @@ async def get_events(
     try:
         events = await queries.get_events(
             server_name=server_name,
-            hours_back=hours_back,
+            hours_back=mins_back,
             severity=severity,
             category=category,
             limit=limit,
@@ -44,22 +44,22 @@ async def get_sweeps(
 @router.get("/summary")
 async def get_summary(
     server_name: str = Query(None, description="Filter by server"),
-    hours_back:  int = Query(24,   description="Hours of history"),
+    mins_back:   int = Query(1440, description="Minutes of history"),
 ):
     try:
         summary = await queries.get_event_summary(
             server_name=server_name,
-            hours_back=hours_back,
+            hours_back=mins_back,
         )
         events = await queries.get_events(
             server_name=server_name,
-            hours_back=hours_back,
+            hours_back=mins_back,
             severity="critical",
             limit=5,
         )
         warns = await queries.get_events(
             server_name=server_name,
-            hours_back=hours_back,
+            hours_back=mins_back,
             severity="warn",
             limit=5,
         )
