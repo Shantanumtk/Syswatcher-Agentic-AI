@@ -27,7 +27,7 @@ def _get_server_ssh(server_name: str) -> tuple:
         pass
     return None, None, None
 
-def _run_ssh(server_name: str, cmd: str, timeout: int = 30) -> str:
+def _run_ssh(server_name: str, cmd: str, timeout: int = 8) -> str:
     """Run a command on a remote server via SSH."""
     ip, user, key_path = _get_server_ssh(server_name)
     if not ip:
@@ -37,7 +37,7 @@ def _run_ssh(server_name: str, cmd: str, timeout: int = 30) -> str:
     try:
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(ip, username=user, key_filename=key_path, timeout=10)
+        client.connect(ip, username=user, key_filename=key_path, timeout=6, banner_timeout=6)
         _, stdout, stderr = client.exec_command(cmd, timeout=timeout)
         out = stdout.read().decode() + stderr.read().decode()
         client.close()
@@ -170,7 +170,7 @@ def create_cron_job(
         try:
             client = paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            client.connect(ip, username=user, key_filename=key_path, timeout=10)
+            client.connect(ip, username=user, key_filename=key_path, timeout=6, banner_timeout=6)
             _, stdout, stderr = client.exec_command(f"echo '{new_crontab}' | crontab -")
             err = stderr.read().decode()
             client.close()
@@ -225,7 +225,7 @@ def delete_cron_job(name: str, server_name: str = "local") -> dict:
         try:
             client = paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            client.connect(ip, username=user, key_filename=key_path, timeout=10)
+            client.connect(ip, username=user, key_filename=key_path, timeout=6, banner_timeout=6)
             _, stdout, stderr = client.exec_command(f"echo '{new_crontab}' | crontab -")
             client.close()
         except Exception as e:
