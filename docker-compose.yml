@@ -92,6 +92,8 @@ services:
     env_file: .env
     volumes:
       - ./agent:/app
+      - /var/spool/cron/crontabs:/var/spool/cron/crontabs
+      - /usr/bin/crontab:/usr/bin/crontab
     ports:
       - "${API_PORT:-8000}:8000"
     depends_on:
