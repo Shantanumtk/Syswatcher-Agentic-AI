@@ -90,6 +90,8 @@ services:
     container_name: syswatcher-agent
     restart: unless-stopped
     env_file: .env
+    environment:
+      - SYSWATCHER_HOST_USER=${HOST_USER:-ubuntu}
     volumes:
       - ./agent:/app
       - /var/spool/cron/crontabs:/var/spool/cron/crontabs
