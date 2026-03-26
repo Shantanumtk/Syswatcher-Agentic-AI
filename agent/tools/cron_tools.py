@@ -13,18 +13,42 @@ def _run_local(cmd: str, timeout: int = 10) -> str:
         return str(e)
 
 def _get_server_ssh(server_name: str) -> tuple:
-    """Get SSH connection details for a server from DB."""
-    def _fetch():
-        return asyncio.run(queries.get_servers())
+    """Get SSH connection details for a server from syswatcher.conf or DB."""
+    import os, configparser
+
+    # Read directly from syswatcher.conf — no async needed
+    conf_path = "/app/syswatcher.conf"
+    if os.path.exists(conf_path):
+        with open(conf_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if "=" in line:
+                    key, val = line.split("=", 1)
+                    if key.strip() == server_name:
+                        parts = val.strip().split()
+                        if len(parts) >= 3:
+                            return parts[0], parts[1], parts[2]
+
+    # Fallback — read from DB via direct postgres query
     try:
-        import concurrent.futures
-        with concurrent.futures.ThreadPoolExecutor() as pool:
-            servers = pool.submit(_fetch).result(timeout=10)
-        for s in servers:
-            if s["name"] == server_name:
-                return s.get("ip"), s.get("ssh_user", "ubuntu"), s.get("ssh_key_path", "")
+        import psycopg2
+        db_url = os.getenv("DATABASE_URL", "")
+        if db_url:
+            conn = psycopg2.connect(db_url)
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT ip, ssh_user, ssh_key_path FROM monitored_servers WHERE name=%s AND active=true",
+                (server_name,)
+            )
+            row = cur.fetchone()
+            conn.close()
+            if row:
+                return row[0], row[1], row[2]
     except Exception:
         pass
+
     return None, None, None
 
 def _run_ssh(server_name: str, cmd: str, timeout: int = 8) -> str:
