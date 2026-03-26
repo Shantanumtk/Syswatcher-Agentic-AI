@@ -163,22 +163,9 @@ def create_cron_job(
         # Write to correct user crontab on host via mounted crontab path
         import os, pwd, grp, configparser
 
-        # Read user from syswatcher.conf directly — no async needed
-        cron_user = "ubuntu"  # default
-        try:
-            conf_path = "/app/syswatcher.conf"
-            if os.path.exists(conf_path):
-                with open(conf_path) as cf:
-                    for line in cf:
-                        line = line.strip()
-                        if line.startswith("local") and "=" in line:
-                            # format: local = <ip> <user> <key>
-                            parts = line.split("=", 1)[1].strip().split()
-                            if len(parts) >= 2:
-                                cron_user = parts[1]
-                                break
-        except Exception:
-            cron_user = "ubuntu"
+        # Read host user from SYSWATCHER_HOST_USER env var set during install
+        import os
+        cron_user = os.getenv("SYSWATCHER_HOST_USER", "ubuntu")
 
         crontab_path = f"/var/spool/cron/crontabs/{cron_user}"
         try:
