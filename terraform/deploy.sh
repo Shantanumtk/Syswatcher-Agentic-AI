@@ -108,6 +108,10 @@ case "$CMD" in
     DEV_IP=$(terraform output  -raw dev_public_ip)
     TEST_IP=$(terraform output -raw test_public_ip)
 
+    JUMP_PRIV=$(terraform output -raw jump_private_ip)
+    DEV_PRIV=$(terraform output  -raw dev_private_ip)
+    TEST_PRIV=$(terraform output -raw test_private_ip)
+
     JUMP_KEY=$(terraform output -raw key_jump)
     DEV_KEY=$(terraform output  -raw key_dev)
     TEST_KEY=$(terraform output -raw key_test)
@@ -128,9 +132,9 @@ with open(conf_path) as f:
 content = re.sub(r'^(jump|dev|test)\s*=.*\n?', '', content, flags=re.MULTILINE)
 
 # Add new server block after the # -- Servers -- comment
-server_block = """jump = $JUMP_IP   ubuntu   $JUMP_KEY
-dev  = $DEV_IP   ubuntu   $DEV_KEY
-test = $TEST_IP   ubuntu   $TEST_KEY
+server_block = """jump = $JUMP_PRIV   ubuntu   $JUMP_KEY
+dev  = $DEV_PRIV   ubuntu   $DEV_KEY
+test = $TEST_PRIV   ubuntu   $TEST_KEY
 """
 
 content = re.sub(
