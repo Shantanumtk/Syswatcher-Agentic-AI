@@ -197,14 +197,16 @@ echo ""
 
 # ── Clone repo ────────────────────────────────────
 echo -e "${BOLD}[2/6] Getting SysWatcher${NC}"
-if [ -d "$SYSWATCHER_DIR" ]; then
-  warn "Directory $SYSWATCHER_DIR already exists — pulling latest"
+if [ -f "docker-compose.yml" ]; then
+  warn "Already in SysWatcher directory — pulling latest"
+  git pull origin main 2>/dev/null || true
+elif [ -d "$SYSWATCHER_DIR" ]; then
+  warn "Directory $SYSWATCHER_DIR exists — pulling latest"
   cd "$SYSWATCHER_DIR"
   git pull origin main 2>/dev/null || true
 else
   info "Cloning from $REPO_URL..."
-  git clone "$REPO_URL" "$SYSWATCHER_DIR"
-  cd "$SYSWATCHER_DIR"
+  git clone "$REPO_URL" .
 fi
 ok "SysWatcher source ready"
 echo ""
