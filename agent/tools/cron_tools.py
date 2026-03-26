@@ -160,13 +160,18 @@ def create_cron_job(
     # Write new crontab via SSH
     if server_name in ("local", "localhost", ""):
         import subprocess
-        # Try ubuntu user first, fall back to current user
-        for cmd in ["sudo -u ubuntu crontab -", "crontab -"]:
-            proc = subprocess.run(cmd, input=new_crontab, shell=True, capture_output=True, text=True)
-            if proc.returncode == 0:
-                break
-        if proc.returncode != 0:
-            return {"success": False, "error": proc.stderr or "crontab command failed — not available in container"}
+        # Write to ubuntu user crontab on host via mounted crontab path
+        import os
+        crontab_path = "/var/spool/cron/crontabs/ubuntu"
+        try:
+            with open(crontab_path, "w") as cf:
+                cf.write(new_crontab)
+            os.chmod(crontab_path, 0o600)
+        except Exception as e:
+            # fallback
+            proc = subprocess.run("crontab -", input=new_crontab, shell=True, capture_output=True, text=True)
+            if proc.returncode != 0:
+                return {"success": False, "error": proc.stderr or "crontab write failed"}
     else:
         ip, user, key_path = _get_server_ssh(server_name)
         if not ip:
