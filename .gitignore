@@ -12,3 +12,4 @@ node_modules/
 *.pem
 *.log
 .DS_Store
+mac_configs/

@@ -140,6 +140,26 @@ services:
       agent:
         condition: service_healthy
 
+  mcp:
+    build:
+      context: ./mcp
+      dockerfile: Dockerfile
+    container_name: syswatcher-mcp
+    restart: unless-stopped
+    environment:
+      - SYSWATCHER_API=http://agent:8000
+      - MCP_API_KEY=${MCP_API_KEY:-syswatcher123}
+    ports:
+      - "8080:8080"
+    depends_on:
+      agent:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   postgres_data:
   prometheus_data:
