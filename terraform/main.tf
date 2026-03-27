@@ -170,6 +170,15 @@ resource "aws_security_group" "jump" {
     cidr_blocks = [var.vpc_cidr]   # internal only
   }
 
+  # MCP Server
+  ingress {
+    description = "SysWatcher MCP"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = [var.allowed_ui_cidr]
+  }
+
   # node_exporter on jump itself
   ingress {
     description = "node_exporter (internal)"
