@@ -395,36 +395,6 @@ Everything you need to manage SysWatcher day-to-day is in `manage.sh`:
 
 ---
 
-## Adding Screenshots to This README
-
-The README references screenshots from `docs/screenshots/`. Here is how to add them so they show up on GitHub:
-
-**Step 1 - Create the folder in your repo:**
-```bash
-mkdir -p docs/screenshots
-```
-
-**Step 2 - Copy your screenshots into the folder with these exact filenames:**
-```
-docs/screenshots/screenshot_chat_local.png
-docs/screenshots/screenshot_chat_test.png
-docs/screenshots/screenshot_grafana.png
-docs/screenshots/screenshot_slack.png
-docs/screenshots/screenshot_cursor_infra.png
-docs/screenshots/screenshot_cursor_deploy.png
-```
-
-**Step 3 - Commit and push:**
-```bash
-git add docs/screenshots/ README.md
-git commit -m "docs: add screenshots"
-git push
-```
-
-GitHub automatically renders the images in the README because the paths are relative to the repo root. No image hosting needed - the screenshots live inside the repo itself.
-
----
-
 ## Cursor Integration (MCP)
 
 SysWatcher exposes all 66 tools via MCP so Cursor's AI can access your live infrastructure while you code.
@@ -896,8 +866,7 @@ Full interactive docs: `http://<jump-ip>:8000/docs`
 
 - [ ] **Auto-remediation** - Safe whitelist of actions (restart service, clear cache, free disk)
 - [ ] **Scheduled Slack reports** - CPU/memory/disk summary every N hours
-- [ ] **Claude Desktop bridge** - Local stdio MCP transport
-- [ ] **DBWatcher** - Database monitoring (Postgres + Oracle), ~85% code reuse from SysWatcher
+- [ ] **DBWatcher** - Database monitoring (Postgres + Oracle)
 - [ ] **Multi-agent sweeps** - Parallel sweeps per server
 - [ ] **RAG on runbooks** - Agent reads your playbooks to suggest specific fixes
 - [ ] **WatcherAI platform** - CI/CD, Security, Cost, Kubernetes, ML watchers
