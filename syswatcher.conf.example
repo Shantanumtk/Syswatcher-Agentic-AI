@@ -1,0 +1,50 @@
+# ═══════════════════════════════════════════════
+# SysWatcher Configuration
+# Fill in the values below, then run ./install.sh
+# ═══════════════════════════════════════════════
+
+# ── Servers ──────────────────────────────────────
+# Format: name = IP   ssh_user   path_to_ssh_key
+# jump = 44.215.88.155   ubuntu   keys/syswatcher-jump.pem
+# dev  = 54.157.149.236   ubuntu   keys/syswatcher-dev.pem
+# test = 100.30.126.14   ubuntu   keys/syswatcher-test.pem
+# Uncomment and fill in your servers:
+
+# prod-01 = 192.168.1.100   ubuntu   ~/.ssh/id_rsa
+# prod-02 = 192.168.1.101   ubuntu   ~/.ssh/id_rsa
+# staging = 192.168.1.102   ec2-user ~/.ssh/staging.pem
+
+# ── LLM (required) ───────────────────────────────
+OPENAI_API_KEY = YOUR_OPENAI_API_KEY_HERE
+LLM_MODEL      = gpt-4o-mini
+
+# ── Postgres ─────────────────────────────────────
+POSTGRES_USER     = syswatcher
+POSTGRES_PASSWORD = syswatcher123
+POSTGRES_DB       = syswatcher
+
+# ── Notifications (leave blank to disable) ───────
+SLACK_WEBHOOK_URL =
+ALERT_EMAIL_TO    =
+SMTP_HOST         = smtp.gmail.com
+SMTP_PORT         = 587
+SMTP_USER         =
+SMTP_PASSWORD     =
+
+# ── Sweep interval ────────────────────────────────
+SWEEP_INTERVAL_MIN = 5
+
+# ── Alert thresholds ──────────────────────────────
+# Events below these = stored silently (no notification)
+# Events above these = stored + Slack/email sent
+CRITICAL_CPU_PCT    = 98
+CRITICAL_MEMORY_PCT = 95
+CRITICAL_DISK_PCT   = 95
+CRITICAL_CRON_FAILS = 3
+
+# ── Grafana ───────────────────────────────────────
+GRAFANA_ADMIN_PASSWORD = admin123
+
+# ── Ports ─────────────────────────────────────────
+UI_PORT  = 3001
+API_PORT = 8000

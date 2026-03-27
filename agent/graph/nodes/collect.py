@@ -1,7 +1,8 @@
-import asyncio
 import logging
+import os
+import concurrent.futures
+import psycopg2
 from langchain_core.messages import HumanMessage, SystemMessage
-from db import queries
 
 logger = logging.getLogger("syswatcher.collect")
 
@@ -25,24 +26,36 @@ CRITICAL RULES:
 - If everything is healthy, say so clearly
 """
 
-async def _start_sweep(server_name: str) -> int:
+def _start_sweep_sync(server_name: str) -> int:
+    """Start sweep record using sync psycopg2 — no event loop conflict."""
     try:
-        return await queries.start_sweep(server_name)
-    except Exception:
+        conn = psycopg2.connect(os.getenv("DATABASE_URL", ""))
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO sweep_runs (server_name) VALUES (%s) RETURNING id",
+            (server_name,)
+        )
+        sweep_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        conn.close()
+        logger.info(f"Sweep record created: id={sweep_id} server={server_name}")
+        return sweep_id
+    except Exception as e:
+        logger.warning(f"Could not start sweep record: {e}")
         return None
 
 def collect_node(state: dict) -> dict:
     server_name = state.get("server_name", "local")
     mode        = state.get("mode", "chat")
     question    = state.get("question", "")
-    intents     = state.get("intents", ["system"])
 
     sweep_id = None
     if mode == "sweep":
         try:
-            loop = asyncio.new_event_loop()
-            sweep_id = loop.run_until_complete(_start_sweep(server_name))
-            loop.close()
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_start_sweep_sync, server_name)
+                sweep_id = future.result(timeout=10)
         except Exception as e:
             logger.warning(f"Could not start sweep record: {e}")
 
@@ -50,8 +63,8 @@ def collect_node(state: dict) -> dict:
 
     if mode == "sweep":
         human_content = (
-            f"Run a full health sweep on server \'{server_name}\'. "
-            f"IMPORTANT: Pass server_name=\'{server_name}\' to every tool call. "
+            f"Run a full health sweep on server '{server_name}'. "
+            f"IMPORTANT: Pass server_name='{server_name}' to every tool call. "
             f"Check CPU, memory, disk, network, load average, open ports, "
             f"cron jobs, recent cron logs, and Prometheus alerts. "
             f"Store all findings as events. Post a Grafana annotation. "
@@ -60,7 +73,7 @@ def collect_node(state: dict) -> dict:
     else:
         human_content = (
             f"Server: {server_name}\n"
-            f"IMPORTANT: Pass server_name=\'{server_name}\' to every tool call.\n"
+            f"IMPORTANT: Pass server_name='{server_name}' to every tool call.\n"
             f"Question: {question}"
         )
 
