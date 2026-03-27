@@ -13,7 +13,7 @@ _prompt = ChatPromptTemplate.from_messages([
     ("system", """You are an intent classifier for a server health agent.
 Return a JSON list of relevant tool groups only, no markdown.
 
-Groups: system, cron, process, logs, prometheus, grafana, alerts, notification
+Groups: system, cron, process, logs, prometheus, grafana, alerts, notification, rca, security, application
 
 Examples:
   "is everything ok" -> ["system","cron","prometheus","logs"]
@@ -21,14 +21,36 @@ Examples:
   "cron jobs" -> ["cron","logs"]
   "alert rules" -> ["alerts"]
   "disk usage" -> ["system"]
-  "auth failures" -> ["logs"]
+  "auth failures" -> ["logs","security"]
   "processes" -> ["process"]
+  "RCA report" -> ["rca","prometheus","grafana"]
+  "root cause" -> ["rca","prometheus","grafana","logs"]
+  "incident" -> ["rca","prometheus","grafana","logs"]
+  "anomaly" -> ["prometheus","rca"]
+  "baseline" -> ["rca","prometheus"]
+  "security scan" -> ["security","logs"]
+  "SSH attacks" -> ["security","logs"]
+  "failed services" -> ["security","application"]
+  "docker" -> ["application"]
+  "is nginx running" -> ["application"]
+  "port open" -> ["application","system"]
+  "URL health" -> ["application"]
+  "memory leak" -> ["prometheus","rca","system"]
+  "disk IO" -> ["prometheus","system"]
+  "network bandwidth" -> ["prometheus","system"]
+  "compare servers" -> ["prometheus"]
+  "iowait" -> ["prometheus","rca"]
+  "SSL cert" -> ["security","application"]
+  "firewall" -> ["security"]
+  "kernel messages" -> ["logs"]
+  "OOM" -> ["logs","rca"]
+  "segfault" -> ["logs","rca"]
 """),
     ("human", "{question}"),
 ])
 
 _chain = _prompt | _llm | JsonOutputParser()
-VALID_GROUPS = {"system","cron","process","logs","prometheus","grafana","alerts","notification"}
+VALID_GROUPS = {"system","cron","process","logs","prometheus","grafana","alerts","notification","rca","security","application"}
 
 def classifier_node(state: AgentState) -> dict:
     if state.get("mode") == "sweep":
